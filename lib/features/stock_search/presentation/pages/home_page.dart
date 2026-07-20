@@ -1,0 +1,143 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:finance/shared/widgets/range_input_widget.dart';
+import 'package:finance/features/stock_search/application/stock_search_controller.dart';
+import 'package:finance/features/stock_search/domain/stock_search_condition.dart';
+
+class HomePage extends ConsumerWidget {
+  const HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final condition = ref.watch(stockSearchConditionProvider);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Treasure Stock Finder'),
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text('お宝株を探す', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
+            RangeInputWidget(
+              label: '売上高成長率',
+              unit: '%',
+              onChangedMin: (val) {
+                ref.read(stockSearchConditionProvider.notifier).update((state) => state.copyWith(revenueGrowthRateMin: double.tryParse(val)));
+              },
+              onChangedMax: (val) {
+                ref.read(stockSearchConditionProvider.notifier).update((state) => state.copyWith(revenueGrowthRateMax: double.tryParse(val)));
+              },
+            ),
+            RangeInputWidget(
+              label: '営業利益成長率',
+              unit: '%',
+              onChangedMin: (val) {
+                ref.read(stockSearchConditionProvider.notifier).update((state) => state.copyWith(operatingProfitGrowthRateMin: double.tryParse(val)));
+              },
+              onChangedMax: (val) {
+                ref.read(stockSearchConditionProvider.notifier).update((state) => state.copyWith(operatingProfitGrowthRateMax: double.tryParse(val)));
+              },
+            ),
+            RangeInputWidget(
+              label: '利益率',
+              unit: '%',
+              onChangedMin: (val) {
+                ref.read(stockSearchConditionProvider.notifier).update((state) => state.copyWith(profitMarginMin: double.tryParse(val)));
+              },
+              onChangedMax: (val) {
+                ref.read(stockSearchConditionProvider.notifier).update((state) => state.copyWith(profitMarginMax: double.tryParse(val)));
+              },
+            ),
+            RangeInputWidget(
+              label: '予想PER',
+              unit: '倍',
+              onChangedMin: (val) {
+                ref.read(stockSearchConditionProvider.notifier).update((state) => state.copyWith(forecastPERMin: double.tryParse(val)));
+              },
+              onChangedMax: (val) {
+                ref.read(stockSearchConditionProvider.notifier).update((state) => state.copyWith(forecastPERMax: double.tryParse(val)));
+              },
+            ),
+            RangeInputWidget(
+              label: 'PBR',
+              unit: '倍',
+              onChangedMin: (val) {
+                ref.read(stockSearchConditionProvider.notifier).update((state) => state.copyWith(pbrMin: double.tryParse(val)));
+              },
+              onChangedMax: (val) {
+                ref.read(stockSearchConditionProvider.notifier).update((state) => state.copyWith(pbrMax: double.tryParse(val)));
+              },
+            ),
+            RangeInputWidget(
+              label: '予想配当利回り',
+              unit: '%',
+              onChangedMin: (val) {
+                ref.read(stockSearchConditionProvider.notifier).update((state) => state.copyWith(forecastDividendYieldMin: double.tryParse(val)));
+              },
+              onChangedMax: (val) {
+                ref.read(stockSearchConditionProvider.notifier).update((state) => state.copyWith(forecastDividendYieldMax: double.tryParse(val)));
+              },
+            ),
+            const SizedBox(height: 16),
+            const Text('市場', style: TextStyle(fontWeight: FontWeight.bold)),
+            DropdownButton<String>(
+              value: condition.market,
+              isExpanded: true,
+              items: const [
+                DropdownMenuItem(value: '全市場', child: Text('全市場')),
+                DropdownMenuItem(value: '東証プライム', child: Text('東証プライム')),
+                DropdownMenuItem(value: '東証スタンダード', child: Text('東証スタンダード')),
+                DropdownMenuItem(value: '東証グロース', child: Text('東証グロース')),
+                DropdownMenuItem(value: '米国株', child: Text('米国株')),
+              ],
+              onChanged: (val) {
+                if (val != null) {
+                  ref.read(stockSearchConditionProvider.notifier).update((state) => state.copyWith(market: val));
+                }
+              },
+            ),
+            const SizedBox(height: 32),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              ),
+              onPressed: () {
+                context.push('/search_results');
+              },
+              child: const Text('検索する', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            ),
+            const SizedBox(height: 16),
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              icon: const Icon(Icons.auto_awesome),
+              label: const Text('AIに条件を入力する (Phase 2)'),
+              onPressed: () {
+                // Phase 2 で実装
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('この機能は次のフェーズで提供されます。')),
+                );
+              },
+            ),
+            const SizedBox(height: 32),
+            const Text(
+              '免責事項\n本アプリは投資判断を支援する情報提供ツールです。\n特定の金融商品の売買を推奨するものではありません。\n投資判断はご自身の責任で行ってください。',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+          ],
+        ),
+      ),
+    );
+  }
+}
