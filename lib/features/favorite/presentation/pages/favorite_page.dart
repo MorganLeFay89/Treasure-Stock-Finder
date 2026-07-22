@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:finance/features/favorite/application/favorite_controller.dart';
-import 'package:finance/features/stock_search/domain/stock.dart';
 
 class FavoritePage extends ConsumerWidget {
   const FavoritePage({super.key});

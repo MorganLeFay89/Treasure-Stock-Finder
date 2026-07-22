@@ -4,6 +4,10 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 /// .envファイルに記載されたキーを読み取ります。
 class EnvConfig {
   /// Gemini API キー
+  static Future<void> init() async {
+    await dotenv.load(fileName: '.env_secrets/.env');
+  }
+
   static String get geminiApiKey =>
       dotenv.env['GEMINI_API_KEY'] ?? '';
 

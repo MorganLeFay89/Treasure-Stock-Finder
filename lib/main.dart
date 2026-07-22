@@ -7,7 +7,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // APIキーを安全に読み込む
-  await dotenv.load(fileName: '絶対にGitHubに上げない秘密の設定/.env');
+  await dotenv.load(fileName: '.env_secrets/.env');
 
   runApp(
     const ProviderScope(

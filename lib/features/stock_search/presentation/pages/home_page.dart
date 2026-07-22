@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:finance/shared/widgets/range_input_widget.dart';
 import 'package:finance/features/stock_search/application/stock_search_controller.dart';
-import 'package:finance/features/stock_search/domain/stock_search_condition.dart';
+import 'package:finance/features/stock_search/domain/stock.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
