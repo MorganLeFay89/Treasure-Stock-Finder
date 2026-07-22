@@ -1,22 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:finance/features/stock_search/domain/stock.dart';
+import 'package:finance/features/favorite/application/favorite_controller.dart';
+import 'package:finance/features/stock_detail/application/ai_analysis_provider.dart';
 
-class StockDetailPage extends StatelessWidget {
+class StockDetailPage extends ConsumerWidget {
   final Stock stock;
 
   const StockDetailPage({super.key, required this.stock});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final favoriteCodesAsync = ref.watch(favoriteCodesProvider);
+    final favoriteCodes = favoriteCodesAsync.value ?? [];
+    final isFavorite = favoriteCodes.contains(stock.stockCode);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(stock.stockName),
         actions: [
           IconButton(
-            icon: const Icon(Icons.favorite_border),
+            icon: Icon(
+              isFavorite ? Icons.favorite : Icons.favorite_border,
+              color: isFavorite ? Colors.red : null,
+            ),
             onPressed: () {
+              ref.read(favoriteCodesProvider.notifier).toggleFavorite(stock.stockCode);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('お気に入りに追加しました (Phase 2で実装)')),
+                SnackBar(
+                  content: Text(isFavorite ? 'お気に入りから削除しました' : 'お気に入りに追加しました'),
+                  duration: const Duration(seconds: 1),
+                ),
               );
             },
           ),
@@ -58,37 +72,33 @@ class StockDetailPage extends StatelessWidget {
             _buildInfoRow('自己資本比率', '${stock.equityRatio}%'),
             const Divider(height: 32),
             const Text(
-              'AIコメント (モック)',
+              'Gemini AI 分析',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Container(
+              width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.primaryContainer,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Text(
-                'この銘柄は売上高成長率と営業利益成長率がともに高く、事業拡大の勢いが確認できます。一方で、PERは業界平均と比較してやや低く、成長性に対して割安に評価されている可能性があります。（※Phase 2でGemini APIに置き換わります）',
-                style: TextStyle(fontSize: 16),
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'リスク要因 (モック)',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.errorContainer,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Text(
-                '利益率の変動が大きいため、今後の決算推移を確認する必要があります。',
-                style: TextStyle(fontSize: 16),
-              ),
+              child: ref.watch(aiAnalysisProvider(stock)).when(
+                    data: (analysis) => Text(
+                      analysis,
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    loading: () => const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: CircularProgressIndicator(),
+                      ),
+                    ),
+                    error: (err, stack) => Text(
+                      'エラーが発生しました: $err',
+                      style: TextStyle(color: Theme.of(context).colorScheme.error),
+                    ),
+                  ),
             ),
             const SizedBox(height: 32),
           ],
