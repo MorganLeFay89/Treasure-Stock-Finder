@@ -1,6 +1,5 @@
 .env
 .env_secrets/
-絶対にGitHubに上げない秘密の設定/
 # Flutter/Dart generated files
 .dart_tool/
 build/
@@ -47,3 +46,4 @@ linux/flutter/ephemeral/
 .env
 .env.*
 !.env.example
+絶対にGitHubに上げない秘密の設定/
