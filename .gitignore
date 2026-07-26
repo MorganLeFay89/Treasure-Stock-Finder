@@ -1,3 +1,49 @@
 .env
 .env_secrets/
 絶対にGitHubに上げない秘密の設定/
+# Flutter/Dart generated files
+.dart_tool/
+build/
+*.dill
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+
+# Pub cache
+.pub-cache/
+.pub/
+
+# Logs
+*.log
+
+# Android generated files
+android/.gradle/
+android/local.properties
+android/app/debug/
+android/app/profile/
+android/app/release/
+**/.cxx/
+
+# iOS/macOS generated files
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/App.framework
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+ios/Flutter/ephemeral/
+macos/Flutter/ephemeral/
+
+# Windows/Linux generated files
+windows/flutter/ephemeral/
+linux/flutter/ephemeral/
+
+# IDE / OS files
+.idea/
+*.iml
+.DS_Store
+
+# Environment secrets
+.env
+.env.*
+!.env.example
