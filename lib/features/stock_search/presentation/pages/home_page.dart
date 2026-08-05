@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:finance/shared/widgets/range_input_widget.dart';
 import 'package:finance/features/stock_search/application/stock_search_controller.dart';
-import 'package:finance/features/stock_search/domain/stock.dart';
+import 'package:finance/features/search_history/application/search_history_controller.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -17,7 +17,18 @@ class HomePage extends ConsumerWidget {
         title: const Text('Treasure Stock Finder'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: 'APIキー設定・ガイド',
+            onPressed: () => context.push('/settings'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.history),
+            tooltip: '検索履歴',
+            onPressed: () => context.push('/search_history'),
+          ),
+          IconButton(
             icon: const Icon(Icons.favorite),
+            tooltip: 'お気に入り',
             onPressed: () => context.push('/favorites'),
           ),
         ],
@@ -80,6 +91,26 @@ class HomePage extends ConsumerWidget {
               },
             ),
             RangeInputWidget(
+              label: 'PSR (株価売上高倍率)',
+              unit: '倍',
+              onChangedMin: (val) {
+                ref.read(stockSearchConditionProvider.notifier).update((state) => state.copyWith(psrMin: double.tryParse(val)));
+              },
+              onChangedMax: (val) {
+                ref.read(stockSearchConditionProvider.notifier).update((state) => state.copyWith(psrMax: double.tryParse(val)));
+              },
+            ),
+            RangeInputWidget(
+              label: 'PEG レシオ (実績ベース)',
+              unit: '倍',
+              onChangedMin: (val) {
+                ref.read(stockSearchConditionProvider.notifier).update((state) => state.copyWith(pegMin: double.tryParse(val)));
+              },
+              onChangedMax: (val) {
+                ref.read(stockSearchConditionProvider.notifier).update((state) => state.copyWith(pegMax: double.tryParse(val)));
+              },
+            ),
+            RangeInputWidget(
               label: '予想配当利回り',
               unit: '%',
               onChangedMin: (val) {
@@ -114,24 +145,20 @@ class HomePage extends ConsumerWidget {
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: Theme.of(context).colorScheme.onPrimary,
               ),
-              onPressed: () {
-                context.push('/search_results');
+              onPressed: () async {
+                // 検索実行時に履歴を追加
+                final searchCondition = ref.read(stockSearchConditionProvider);
+                final searchResults = await ref.read(searchResultsProvider.future);
+                ref.read(searchHistoryControllerProvider.notifier).addHistory(
+                      condition: searchCondition,
+                      resultCount: searchResults.length,
+                    );
+
+                if (context.mounted) {
+                  context.push('/search_results');
+                }
               },
               child: const Text('検索する', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            ),
-            const SizedBox(height: 16),
-            OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-              icon: const Icon(Icons.auto_awesome),
-              label: const Text('AIに条件を入力する (Phase 2)'),
-              onPressed: () {
-                // Phase 2 で実装
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('この機能は次のフェーズで提供されます。')),
-                );
-              },
             ),
             const SizedBox(height: 32),
             const Text(

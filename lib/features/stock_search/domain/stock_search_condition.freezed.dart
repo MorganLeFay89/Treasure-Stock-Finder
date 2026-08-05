@@ -34,6 +34,10 @@ mixin _$StockSearchCondition {
   double? get forecastPERMax => throw _privateConstructorUsedError;
   double? get pbrMin => throw _privateConstructorUsedError;
   double? get pbrMax => throw _privateConstructorUsedError;
+  double? get psrMin => throw _privateConstructorUsedError;
+  double? get psrMax => throw _privateConstructorUsedError;
+  double? get pegMin => throw _privateConstructorUsedError;
+  double? get pegMax => throw _privateConstructorUsedError;
   double? get forecastDividendYieldMin => throw _privateConstructorUsedError;
   double? get forecastDividendYieldMax => throw _privateConstructorUsedError;
 
@@ -66,6 +70,10 @@ abstract class $StockSearchConditionCopyWith<$Res> {
       double? forecastPERMax,
       double? pbrMin,
       double? pbrMax,
+      double? psrMin,
+      double? psrMax,
+      double? pegMin,
+      double? pegMax,
       double? forecastDividendYieldMin,
       double? forecastDividendYieldMax});
 }
@@ -98,6 +106,10 @@ class _$StockSearchConditionCopyWithImpl<$Res,
     Object? forecastPERMax = freezed,
     Object? pbrMin = freezed,
     Object? pbrMax = freezed,
+    Object? psrMin = freezed,
+    Object? psrMax = freezed,
+    Object? pegMin = freezed,
+    Object? pegMax = freezed,
     Object? forecastDividendYieldMin = freezed,
     Object? forecastDividendYieldMax = freezed,
   }) {
@@ -150,6 +162,22 @@ class _$StockSearchConditionCopyWithImpl<$Res,
           ? _value.pbrMax
           : pbrMax // ignore: cast_nullable_to_non_nullable
               as double?,
+      psrMin: freezed == psrMin
+          ? _value.psrMin
+          : psrMin // ignore: cast_nullable_to_non_nullable
+              as double?,
+      psrMax: freezed == psrMax
+          ? _value.psrMax
+          : psrMax // ignore: cast_nullable_to_non_nullable
+              as double?,
+      pegMin: freezed == pegMin
+          ? _value.pegMin
+          : pegMin // ignore: cast_nullable_to_non_nullable
+              as double?,
+      pegMax: freezed == pegMax
+          ? _value.pegMax
+          : pegMax // ignore: cast_nullable_to_non_nullable
+              as double?,
       forecastDividendYieldMin: freezed == forecastDividendYieldMin
           ? _value.forecastDividendYieldMin
           : forecastDividendYieldMin // ignore: cast_nullable_to_non_nullable
@@ -183,6 +211,10 @@ abstract class _$$StockSearchConditionImplCopyWith<$Res>
       double? forecastPERMax,
       double? pbrMin,
       double? pbrMax,
+      double? psrMin,
+      double? psrMax,
+      double? pegMin,
+      double? pegMax,
       double? forecastDividendYieldMin,
       double? forecastDividendYieldMax});
 }
@@ -212,6 +244,10 @@ class __$$StockSearchConditionImplCopyWithImpl<$Res>
     Object? forecastPERMax = freezed,
     Object? pbrMin = freezed,
     Object? pbrMax = freezed,
+    Object? psrMin = freezed,
+    Object? psrMax = freezed,
+    Object? pegMin = freezed,
+    Object? pegMax = freezed,
     Object? forecastDividendYieldMin = freezed,
     Object? forecastDividendYieldMax = freezed,
   }) {
@@ -264,6 +300,22 @@ class __$$StockSearchConditionImplCopyWithImpl<$Res>
           ? _value.pbrMax
           : pbrMax // ignore: cast_nullable_to_non_nullable
               as double?,
+      psrMin: freezed == psrMin
+          ? _value.psrMin
+          : psrMin // ignore: cast_nullable_to_non_nullable
+              as double?,
+      psrMax: freezed == psrMax
+          ? _value.psrMax
+          : psrMax // ignore: cast_nullable_to_non_nullable
+              as double?,
+      pegMin: freezed == pegMin
+          ? _value.pegMin
+          : pegMin // ignore: cast_nullable_to_non_nullable
+              as double?,
+      pegMax: freezed == pegMax
+          ? _value.pegMax
+          : pegMax // ignore: cast_nullable_to_non_nullable
+              as double?,
       forecastDividendYieldMin: freezed == forecastDividendYieldMin
           ? _value.forecastDividendYieldMin
           : forecastDividendYieldMin // ignore: cast_nullable_to_non_nullable
@@ -292,6 +344,10 @@ class _$StockSearchConditionImpl implements _StockSearchCondition {
       this.forecastPERMax,
       this.pbrMin,
       this.pbrMax,
+      this.psrMin,
+      this.psrMax,
+      this.pegMin,
+      this.pegMax,
       this.forecastDividendYieldMin,
       this.forecastDividendYieldMax});
 
@@ -323,13 +379,21 @@ class _$StockSearchConditionImpl implements _StockSearchCondition {
   @override
   final double? pbrMax;
   @override
+  final double? psrMin;
+  @override
+  final double? psrMax;
+  @override
+  final double? pegMin;
+  @override
+  final double? pegMax;
+  @override
   final double? forecastDividendYieldMin;
   @override
   final double? forecastDividendYieldMax;
 
   @override
   String toString() {
-    return 'StockSearchCondition(market: $market, industry: $industry, revenueGrowthRateMin: $revenueGrowthRateMin, revenueGrowthRateMax: $revenueGrowthRateMax, operatingProfitGrowthRateMin: $operatingProfitGrowthRateMin, operatingProfitGrowthRateMax: $operatingProfitGrowthRateMax, profitMarginMin: $profitMarginMin, profitMarginMax: $profitMarginMax, forecastPERMin: $forecastPERMin, forecastPERMax: $forecastPERMax, pbrMin: $pbrMin, pbrMax: $pbrMax, forecastDividendYieldMin: $forecastDividendYieldMin, forecastDividendYieldMax: $forecastDividendYieldMax)';
+    return 'StockSearchCondition(market: $market, industry: $industry, revenueGrowthRateMin: $revenueGrowthRateMin, revenueGrowthRateMax: $revenueGrowthRateMax, operatingProfitGrowthRateMin: $operatingProfitGrowthRateMin, operatingProfitGrowthRateMax: $operatingProfitGrowthRateMax, profitMarginMin: $profitMarginMin, profitMarginMax: $profitMarginMax, forecastPERMin: $forecastPERMin, forecastPERMax: $forecastPERMax, pbrMin: $pbrMin, pbrMax: $pbrMax, psrMin: $psrMin, psrMax: $psrMax, pegMin: $pegMin, pegMax: $pegMax, forecastDividendYieldMin: $forecastDividendYieldMin, forecastDividendYieldMax: $forecastDividendYieldMax)';
   }
 
   @override
@@ -362,6 +426,10 @@ class _$StockSearchConditionImpl implements _StockSearchCondition {
                 other.forecastPERMax == forecastPERMax) &&
             (identical(other.pbrMin, pbrMin) || other.pbrMin == pbrMin) &&
             (identical(other.pbrMax, pbrMax) || other.pbrMax == pbrMax) &&
+            (identical(other.psrMin, psrMin) || other.psrMin == psrMin) &&
+            (identical(other.psrMax, psrMax) || other.psrMax == psrMax) &&
+            (identical(other.pegMin, pegMin) || other.pegMin == pegMin) &&
+            (identical(other.pegMax, pegMax) || other.pegMax == pegMax) &&
             (identical(
                     other.forecastDividendYieldMin, forecastDividendYieldMin) ||
                 other.forecastDividendYieldMin == forecastDividendYieldMin) &&
@@ -386,6 +454,10 @@ class _$StockSearchConditionImpl implements _StockSearchCondition {
       forecastPERMax,
       pbrMin,
       pbrMax,
+      psrMin,
+      psrMax,
+      pegMin,
+      pegMax,
       forecastDividendYieldMin,
       forecastDividendYieldMax);
 
@@ -421,6 +493,10 @@ abstract class _StockSearchCondition implements StockSearchCondition {
       final double? forecastPERMax,
       final double? pbrMin,
       final double? pbrMax,
+      final double? psrMin,
+      final double? psrMax,
+      final double? pegMin,
+      final double? pegMax,
       final double? forecastDividendYieldMin,
       final double? forecastDividendYieldMax}) = _$StockSearchConditionImpl;
 
@@ -451,6 +527,14 @@ abstract class _StockSearchCondition implements StockSearchCondition {
   double? get pbrMin;
   @override
   double? get pbrMax;
+  @override
+  double? get psrMin;
+  @override
+  double? get psrMax;
+  @override
+  double? get pegMin;
+  @override
+  double? get pegMax;
   @override
   double? get forecastDividendYieldMin;
   @override

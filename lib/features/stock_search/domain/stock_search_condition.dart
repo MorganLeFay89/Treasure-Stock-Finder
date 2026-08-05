@@ -18,6 +18,10 @@ class StockSearchCondition with _$StockSearchCondition {
     double? forecastPERMax,
     double? pbrMin,
     double? pbrMax,
+    double? psrMin,
+    double? psrMax,
+    double? pegMin,
+    double? pegMax,
     double? forecastDividendYieldMin,
     double? forecastDividendYieldMax,
   }) = _StockSearchCondition;

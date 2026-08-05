@@ -23,6 +23,10 @@ _$StockSearchConditionImpl _$$StockSearchConditionImplFromJson(
       forecastPERMax: (json['forecastPERMax'] as num?)?.toDouble(),
       pbrMin: (json['pbrMin'] as num?)?.toDouble(),
       pbrMax: (json['pbrMax'] as num?)?.toDouble(),
+      psrMin: (json['psrMin'] as num?)?.toDouble(),
+      psrMax: (json['psrMax'] as num?)?.toDouble(),
+      pegMin: (json['pegMin'] as num?)?.toDouble(),
+      pegMax: (json['pegMax'] as num?)?.toDouble(),
       forecastDividendYieldMin:
           (json['forecastDividendYieldMin'] as num?)?.toDouble(),
       forecastDividendYieldMax:
@@ -44,6 +48,10 @@ Map<String, dynamic> _$$StockSearchConditionImplToJson(
       'forecastPERMax': instance.forecastPERMax,
       'pbrMin': instance.pbrMin,
       'pbrMax': instance.pbrMax,
+      'psrMin': instance.psrMin,
+      'psrMax': instance.psrMax,
+      'pegMin': instance.pegMin,
+      'pegMax': instance.pegMax,
       'forecastDividendYieldMin': instance.forecastDividendYieldMin,
       'forecastDividendYieldMax': instance.forecastDividendYieldMax,
     };

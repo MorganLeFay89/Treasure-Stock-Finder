@@ -1,9 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:finance/features/stock_search/domain/stock.dart';
 import 'package:finance/features/stock_search/domain/stock_search_condition.dart';
+import 'package:finance/features/stock_data/data/jquants_stock_repository.dart';
 
 final stockRepositoryProvider = Provider<StockRepository>((ref) {
-  return MockStockRepository();
+  return JQuantsStockRepository();
 });
 
 abstract class StockRepository {
