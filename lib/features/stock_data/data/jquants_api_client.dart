@@ -5,94 +5,114 @@ import 'package:finance/features/stock_data/domain/daily_stock_price.dart';
 import 'package:finance/features/stock_data/domain/financial_summary.dart';
 import 'package:finance/features/stock_data/domain/stock_master.dart';
 
-/// J-Quants API 通信用クライアント
+/// J-Quants API V2 通信用クライアント（APIキー認証）
 class JQuantsApiClient {
-  static const String _baseUrl = 'https://api.jquants.com/v1';
+  static const String _baseUrl = 'https://api.jquants.com/v2';
   final ApiClient _client;
-  String? _idToken;
 
   JQuantsApiClient({ApiClient? client}) : _client = client ?? ApiClient();
 
-  /// IDトークン取得（未取得または期限切れ時に呼び出し）
-  Future<String> _getIdToken() async {
-    if (_idToken != null && _idToken!.isNotEmpty) {
-      return _idToken!;
-    }
-
+  Map<String, String> _headers() {
     if (!EnvConfig.isJquantsApiKeySet) {
-      throw ApiAuthException('J-Quants APIキーが設定されていません。.env_secrets/.env を確認してください。');
+      throw ApiAuthException(
+        'J-Quants APIキーが設定されていません。.env_secrets/.env を確認してください。',
+      );
     }
-
-    final refreshToken = EnvConfig.jquantsApiKey;
-    final uri = Uri.parse('$_baseUrl/token/auth/refresh?refreshtoken=$refreshToken');
-
-    final response = await _client.post(uri);
-    if (response is Map && response.containsKey('idToken')) {
-      _idToken = response['idToken'].toString();
-      return _idToken!;
-    }
-    throw ApiAuthException('J-Quants IDトークンの取得に失敗しました。');
+    return {'x-api-key': EnvConfig.jquantsApiKey};
   }
 
-  /// 共通ヘッダー（IDトークン付き）
-  Future<Map<String, String>> _headers() async {
-    final token = await _getIdToken();
-    return {
-      'Authorization': 'Bearer $token',
-      'Content-Type': 'application/json',
-    };
+  /// pagination_key 付きレスポンスをすべて結合して返す
+  Future<List<Map<String, dynamic>>> _fetchAllData(
+    String path, {
+    Map<String, String> queryParameters = const {},
+  }) async {
+    final results = <Map<String, dynamic>>[];
+    final params = Map<String, String>.from(queryParameters);
+
+    while (true) {
+      final uri = Uri.parse('$_baseUrl$path').replace(
+        queryParameters: params.isEmpty ? null : params,
+      );
+      final response = await _client.get(uri, headers: _headers());
+
+      if (response is! Map) {
+        break;
+      }
+
+      final data = response['data'];
+      if (data is List) {
+        for (final item in data) {
+          if (item is Map<String, dynamic>) {
+            results.add(item);
+          } else if (item is Map) {
+            results.add(Map<String, dynamic>.from(item));
+          }
+        }
+      }
+
+      final paginationKey = response['pagination_key']?.toString();
+      if (paginationKey == null || paginationKey.isEmpty) {
+        break;
+      }
+      params['pagination_key'] = paginationKey;
+    }
+
+    return results;
   }
 
-  /// 銘柄一覧の取得
+  static String _formatDateParam(DateTime date) {
+    final y = date.year.toString().padLeft(4, '0');
+    final m = date.month.toString().padLeft(2, '0');
+    final d = date.day.toString().padLeft(2, '0');
+    return '$y$m$d';
+  }
+
+  /// 銘柄一覧の取得（/v2/equities/master）
   Future<List<StockMaster>> fetchStockList({String? code}) async {
-    var uriString = '$_baseUrl/listed/info';
+    final params = <String, String>{};
     if (code != null && code.isNotEmpty) {
-      uriString += '?code=$code';
+      params['code'] = code;
     }
-    final uri = Uri.parse(uriString);
-    final headers = await _headers();
 
-    final response = await _client.get(uri, headers: headers);
-    if (response is Map && response.containsKey('info')) {
-      final list = response['info'] as List;
-      return list.map((json) => StockMaster.fromJson(json as Map<String, dynamic>)).toList();
-    }
-    return [];
+    final rows = await _fetchAllData('/equities/master', queryParameters: params);
+    return rows.map(StockMaster.fromJson).toList();
   }
 
-  /// 株価四本値の取得
+  /// 株価四本値の取得（/v2/equities/bars/daily）
   Future<List<DailyStockPrice>> fetchDailyPrices({
     required String code,
     String? from,
     String? to,
   }) async {
-    var uriString = '$_baseUrl/prices/daily_quotes?code=$code';
-    if (from != null) uriString += '&from=$from';
-    if (to != null) uriString += '&to=$to';
+    final params = <String, String>{'code': code};
 
-    final uri = Uri.parse(uriString);
-    final headers = await _headers();
-
-    final response = await _client.get(uri, headers: headers);
-    if (response is Map && response.containsKey('daily_quotes')) {
-      final list = response['daily_quotes'] as List;
-      return list.map((json) => DailyStockPrice.fromJson(json as Map<String, dynamic>)).toList();
+    if (from != null && from.isNotEmpty) {
+      params['from'] = from;
+    } else {
+      final fromDate = DateTime.now().subtract(const Duration(days: 120));
+      params['from'] = _formatDateParam(fromDate);
     }
-    return [];
+
+    if (to != null && to.isNotEmpty) {
+      params['to'] = to;
+    }
+
+    final rows = await _fetchAllData('/equities/bars/daily', queryParameters: params);
+    final prices = rows.map(DailyStockPrice.fromJson).toList();
+    prices.sort((a, b) => a.date.compareTo(b.date));
+    return prices;
   }
 
-  /// 財務情報サマリーの取得
+  /// 財務情報サマリーの取得（/v2/fins/summary）
   Future<List<FinancialSummary>> fetchFinancialStatements({
     required String code,
   }) async {
-    final uri = Uri.parse('$_baseUrl/fins/statements?code=$code');
-    final headers = await _headers();
-
-    final response = await _client.get(uri, headers: headers);
-    if (response is Map && response.containsKey('statements')) {
-      final list = response['statements'] as List;
-      return list.map((json) => FinancialSummary.fromJson(json as Map<String, dynamic>)).toList();
-    }
-    return [];
+    final rows = await _fetchAllData(
+      '/fins/summary',
+      queryParameters: {'code': code},
+    );
+    final summaries = rows.map(FinancialSummary.fromJson).toList();
+    summaries.sort((a, b) => a.periodEnd.compareTo(b.periodEnd));
+    return summaries;
   }
 }

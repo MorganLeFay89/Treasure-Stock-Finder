@@ -15,6 +15,14 @@ build/
 # Logs
 *.log
 
+# Local Database & Cache Data Files
+*.db
+*.sqlite
+*.sqlite3
+*.json
+cache/
+data_cache/
+
 # Android generated files
 android/.gradle/
 android/local.properties

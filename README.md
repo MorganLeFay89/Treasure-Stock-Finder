@@ -11,7 +11,8 @@ J-Quants API / EDINET API との連携、および Gemini AI を活用した銘�
 
 | 機能 | 状態 | 説明 |
 |------|------|------|
-| 📊 条件検索 | ✅ 実装済 | 売上高成長率・PER・PBR・PSR・PEG・配当利回り等を範囲指定してスクリーニング |
+| 📊 条件検索 | ✅ 実装済 | 売上高成長率・PER・PBR・PSR・PEG・配当利回り等を範囲指定してローカル高速スクリーニング |
+| 🔄 バックグラウンド同期 | ✅ 実装済 | 5リクエスト/分以下の制限を守り銘柄コード順に自動データ取得・保存＆全件更新ローリング |
 | 📋 検索結果一覧 | ✅ 実装済 | 条件に合致した銘柄をリスト表示（AIスコア・バリュエーション指標付き） |
 | 📈 銘柄詳細画面 | ✅ 実装済 | 各種財務指標・株価情報・EDINET開示情報・統合AI分析を表示 |
 | 🔑 APIキー安全管理 | ✅ 実装済 | `.env_secrets/.env` + `.gitignore` による GitHub 公開対策 |
@@ -34,7 +35,7 @@ J-Quants API / EDINET API との連携、および Gemini AI を活用した銘�
 | ルーティング | GoRouter |
 | グラフ描画 | fl_chart |
 | データベース | shared_preferences (完全ローカル構成) |
-| 外部API | J-Quants API / EDINET API |
+| 外部API | J-Quants API V2 / EDINET API |
 | AI | Gemini API (google_generative_ai) |
 | 通信 | http / flutter_dotenv |
 
@@ -96,6 +97,8 @@ cd finance
 
 - **J-Quants APIキー**
   - 日本株の銘柄一覧、株価四本値、財務サマリー取得に使用します。
+  - **J-Quants API V2** の認証方式（`x-api-key` ヘッダ）に対応しています。V1 の Refresh Token / ID Token 方式は使用しません。
+  - [J-Quants ダッシュボード](https://jquants.com/) にログインし、**Settings → API Key** から API キーを発行して `.env` に設定してください。
   - J-Quants APIは個人の私的利用を前提としたサービスです。取得したデータを第三者へ配信・共有する用途では使用しないでください。
 - **EDINET APIキー**
   - 有価証券報告書、四半期報告書、XBRLデータ取得に使用します。金融庁EDINETにてAPIキーを取得してください。
@@ -113,7 +116,20 @@ EDINET_API_KEY=your_edinet_api_key
 ```
 
 > ⚠️ `.env_secrets` フォルダは `.gitignore` によりGit管理対象外です。APIキーをGitHub等に公開しないでください。  
-> ⚠️ 本アプリは、ユーザー各自のAPIキーを使ってユーザー本人の端末上でデータを取得・分析する設計です。アプリ開発者はJ-Quants、EDINET、Gemini由来のデータやAPIキーを同梱・再配布しません。
+> ⚠️ 本アプリは、ユーザー各自のAPIキーを使ってユーザー本人の端末上でデータを取得・分析する設計です。アプリ開発者はJ-Quants、EDINET、Gemini由来のデータやAPIキーを同梱・再配布しません。  
+> ⚠️ **J-Quants について:** 本アプリは `https://api.jquants.com/v2` を利用します。`.env` の `JQUANTS_API_KEY` には **ダッシュボードで発行した API キー** を設定してください（旧 V1 の Refresh Token は非対応）。`.env` を変更した場合はアプリを再起動してください。
+
+### J-Quants API（V2）連携について
+
+| 項目 | 内容 |
+|------|------|
+| 認証 | リクエストヘッダ `x-api-key: {APIキー}` |
+| 銘柄マスタ | `GET /v2/equities/master` |
+| 株価四本値 | `GET /v2/equities/bars/daily` |
+| 財務サマリー | `GET /v2/fins/summary` |
+| 参考 | [V1→V2 移行ガイド](https://jpx-jquants.com/en/spec/migration-v1-v2) |
+
+**Web（Chrome）での起動:** ブラウザから J-Quants API を直接呼び出すと CORS により失敗し、検索結果がモックデータ（4銘柄固定）にフォールバックすることがあります。実データ確認時は `flutter run -d windows` など **デスクトップ／モバイル** での実行を推奨します。
 
 ### 3. パッケージの取得とコード生成
 ```bash

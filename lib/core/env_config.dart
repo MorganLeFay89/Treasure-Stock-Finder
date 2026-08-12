@@ -15,7 +15,7 @@ class EnvConfig {
   static String get stockApiKey =>
       dotenv.env['STOCK_API_KEY'] ?? '';
 
-  /// J-Quants API キー
+  /// J-Quants API キー（V2: ダッシュボードで発行した API キーを x-api-key ヘッダに使用）
   static String get jquantsApiKey =>
       dotenv.env['JQUANTS_API_KEY'] ?? '';
 

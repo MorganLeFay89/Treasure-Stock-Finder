@@ -7,8 +7,7 @@ import 'package:finance/features/stock_data/application/valuation_calculator.dar
 final jquantsApiClientProvider = Provider((ref) => JQuantsApiClient());
 
 final jquantsStockRepositoryProvider = Provider((ref) {
-  final client = ref.watch(jquantsApiClientProvider);
-  return JQuantsStockRepository(apiClient: client);
+  return JQuantsStockRepository();
 });
 
 /// 銘柄ごとの詳細株価・財務・バリュエーション指標を取得するプロバイダ

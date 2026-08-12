@@ -46,6 +46,24 @@ class ValuationCalculator {
     return double.parse((((currentRevenue / previousRevenue) - 1) * 100).toStringAsFixed(2));
   }
 
+  /// 営業利益成長率(%) = (直近営業利益 / 前期営業利益 - 1) * 100
+  static double? calculateOperatingProfitGrowthRate({double? currentOp, double? previousOp}) {
+    if (currentOp == null || previousOp == null || previousOp <= 0) return null;
+    return double.parse((((currentOp / previousOp) - 1) * 100).toStringAsFixed(2));
+  }
+
+  /// 売上高営業利益率(%) = (営業利益 / 売上高) * 100
+  static double? calculateProfitMargin({double? operatingProfit, double? revenue}) {
+    if (operatingProfit == null || revenue == null || revenue <= 0) return null;
+    return double.parse(((operatingProfit / revenue) * 100).toStringAsFixed(2));
+  }
+
+  /// ROE(%) (概算: EPS / BPS * 100)
+  static double? calculateROE({double? eps, double? bps}) {
+    if (eps == null || bps == null || bps <= 0) return null;
+    return double.parse(((eps / bps) * 100).toStringAsFixed(2));
+  }
+
   /// EPS成長率(%) = (直近EPS / 前期EPS - 1) * 100
   static double? calculateEpsGrowthRate({double? currentEps, double? previousEps}) {
     if (currentEps == null || previousEps == null || previousEps <= 0) return null;

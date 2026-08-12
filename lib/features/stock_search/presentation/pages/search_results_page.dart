@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:finance/core/api_error.dart';
 import 'package:finance/features/stock_search/application/stock_search_controller.dart';
 import 'package:finance/features/stock_data/application/stock_data_controller.dart';
 
@@ -95,7 +96,110 @@ class SearchResultsPage extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(child: Text('エラーが発生しました: $error')),
+        error: (error, stack) {
+          final isRateLimit = error is ApiRateLimitException;
+          final isAuthError = error is ApiAuthException;
+
+          return Column(
+            children: [
+              // 画面最上部の固定警告バナー
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                decoration: BoxDecoration(
+                  color: isRateLimit ? Colors.orange.shade800 : Colors.red.shade800,
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 4,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      isRateLimit ? Icons.speed : Icons.warning_amber_rounded,
+                      color: Colors.white,
+                      size: 26,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        isRateLimit
+                            ? '⚠️ API利用上限（レート制限）に達しました'
+                            : isAuthError
+                                ? '⚠️ API認証エラーが発生しました'
+                                : '⚠️ 検索エラーが発生しました',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        ref.invalidate(searchResultsProvider);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.white24,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.refresh, color: Colors.white, size: 16),
+                            SizedBox(width: 4),
+                            Text('再試行', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // 中央〜下部の詳細説明カード
+              Expanded(
+                child: Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Card(
+                      color: isRateLimit ? Colors.orange.shade50 : Colors.red.shade50,
+                      elevation: 2,
+                      child: Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              isRateLimit
+                                  ? 'J-Quants APIのアクセス回数制限（HTTP 429）を超過しています。\n\n【対処方法】\n短時間に多数のリクエストが行われたため、データ取得が一時制限されています。\n数分〜数十分ほど時間をおいてから上部の「再試行」ボタンをタップしてください。'
+                                  : error.toString(),
+                              style: const TextStyle(fontSize: 14, height: 1.6),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 20),
+                            OutlinedButton.icon(
+                              icon: const Icon(Icons.settings),
+                              label: const Text('APIキー設定・ステータスを確認'),
+                              onPressed: () {
+                                context.push('/settings');
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

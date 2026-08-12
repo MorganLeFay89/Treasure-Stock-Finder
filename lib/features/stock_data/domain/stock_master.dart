@@ -15,9 +15,18 @@ class StockMaster {
   factory StockMaster.fromJson(Map<String, dynamic> json) {
     return StockMaster(
       code: json['Code']?.toString() ?? json['code']?.toString() ?? '',
-      name: json['CompanyName']?.toString() ?? json['name']?.toString() ?? '',
-      market: json['MarketCodeName']?.toString() ?? json['market']?.toString() ?? '未分類',
-      sector: json['Sector17CodeName']?.toString() ?? json['sector']?.toString() ?? 'その他',
+      name: json['CoName']?.toString() ??
+          json['CompanyName']?.toString() ??
+          json['name']?.toString() ??
+          '',
+      market: json['MktNm']?.toString() ??
+          json['MarketCodeName']?.toString() ??
+          json['market']?.toString() ??
+          '未分類',
+      sector: json['S17Nm']?.toString() ??
+          json['Sector17CodeName']?.toString() ??
+          json['sector']?.toString() ??
+          'その他',
     );
   }
 

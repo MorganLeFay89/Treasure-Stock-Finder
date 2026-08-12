@@ -31,11 +31,17 @@ class DailyStockPrice {
     return DailyStockPrice(
       code: json['Code']?.toString() ?? json['code']?.toString() ?? '',
       date: parsedDate,
-      open: _toDouble(json['Open'] ?? json['open']),
-      high: _toDouble(json['High'] ?? json['high']),
-      low: _toDouble(json['Low'] ?? json['low']),
-      close: _toDouble(json['Close'] ?? json['close'] ?? json['AdjustmentClose']),
-      volume: _toInt(json['Volume'] ?? json['volume']),
+      open: _toDouble(json['O'] ?? json['Open'] ?? json['open']),
+      high: _toDouble(json['H'] ?? json['High'] ?? json['high']),
+      low: _toDouble(json['L'] ?? json['Low'] ?? json['low']),
+      close: _toDouble(
+        json['AdjC'] ??
+            json['C'] ??
+            json['Close'] ??
+            json['close'] ??
+            json['AdjustmentClose'],
+      ),
+      volume: _toInt(json['AdjVo'] ?? json['Vo'] ?? json['Volume'] ?? json['volume']),
     );
   }
 

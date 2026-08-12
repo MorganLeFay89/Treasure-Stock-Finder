@@ -86,7 +86,7 @@ class ApiSettingsPage extends StatelessWidget {
                 '1. プロジェクトフォルダ直下の `.env_secrets` フォルダ内の `.env` ファイルを開きます。\n'
                 '2. 各APIのキーを以下のように記述して保存してください:\n\n'
                 'GEMINI_API_KEY=your_gemini_key\n'
-                'JQUANTS_API_KEY=your_jquants_refresh_token\n'
+                'JQUANTS_API_KEY=your_jquants_api_key\n'
                 'EDINET_API_KEY=your_edinet_subscription_key\n\n'
                 '※未設定のAPIがある場合は、モックデータまたは一部制限モードで自動的に動作します。',
                 style: TextStyle(fontSize: 14),

@@ -26,7 +26,11 @@ class FinancialSummary {
 
   factory FinancialSummary.fromJson(Map<String, dynamic> json) {
     DateTime parsedDate;
-    if (json['DisclosedDate'] != null) {
+    if (json['CurPerEn'] != null && json['CurPerEn'].toString().isNotEmpty) {
+      parsedDate = DateTime.tryParse(json['CurPerEn'].toString()) ?? DateTime.now();
+    } else if (json['DiscDate'] != null) {
+      parsedDate = DateTime.tryParse(json['DiscDate'].toString()) ?? DateTime.now();
+    } else if (json['DisclosedDate'] != null) {
       parsedDate = DateTime.tryParse(json['DisclosedDate'].toString()) ?? DateTime.now();
     } else if (json['periodEnd'] != null) {
       parsedDate = DateTime.tryParse(json['periodEnd'].toString()) ?? DateTime.now();
@@ -35,16 +39,26 @@ class FinancialSummary {
     }
 
     return FinancialSummary(
-      code: json['LocalCode']?.toString() ?? json['code']?.toString() ?? '',
+      code: json['Code']?.toString() ?? json['LocalCode']?.toString() ?? json['code']?.toString() ?? '',
       periodEnd: parsedDate,
-      revenue: _toDouble(json['NetSales'] ?? json['revenue']),
-      operatingProfit: _toDouble(json['OperatingProfit'] ?? json['operatingProfit']),
-      ordinaryProfit: _toDouble(json['OrdinaryProfit'] ?? json['ordinaryProfit']),
-      netIncome: _toDouble(json['Profit'] ?? json['netIncome']),
-      eps: _toDouble(json['EarningsPerShare'] ?? json['eps']),
-      bps: _toDouble(json['BookValuePerShare'] ?? json['bps']),
-      dividendPerShare: _toDouble(json['ForecastDividendPerShareAnnual'] ?? json['ResultDividendPerShareAnnual'] ?? json['dividendPerShare']),
-      issuedShares: _toInt(json['NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock'] ?? json['issuedShares']),
+      revenue: _toDouble(json['Sales'] ?? json['NetSales'] ?? json['revenue']),
+      operatingProfit: _toDouble(json['OP'] ?? json['OperatingProfit'] ?? json['operatingProfit']),
+      ordinaryProfit: _toDouble(json['OdP'] ?? json['OrdinaryProfit'] ?? json['ordinaryProfit']),
+      netIncome: _toDouble(json['NP'] ?? json['Profit'] ?? json['netIncome']),
+      eps: _toDouble(json['EPS'] ?? json['EarningsPerShare'] ?? json['eps']),
+      bps: _toDouble(json['BPS'] ?? json['BookValuePerShare'] ?? json['bps']),
+      dividendPerShare: _toDouble(
+        json['FDivAnn'] ??
+            json['DivAnn'] ??
+            json['ForecastDividendPerShareAnnual'] ??
+            json['ResultDividendPerShareAnnual'] ??
+            json['dividendPerShare'],
+      ),
+      issuedShares: _toInt(
+        json['ShOutFY'] ??
+            json['NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock'] ??
+            json['issuedShares'],
+      ),
     );
   }
 
