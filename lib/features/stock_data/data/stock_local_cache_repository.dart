@@ -9,6 +9,12 @@ class StockLocalCacheRepository {
   static const String _stocksUpdatedTimeKey = 'cached_stocks_updated_time_map';
   static const String _syncIndexKey = 'sync_current_index';
 
+  /// コード表記を正規化（5桁末尾0 -> 4桁）
+  String _normalizeCode(String code) {
+    if (code.length == 5 && code.endsWith('0')) return code.substring(0, 4);
+    return code;
+  }
+
   /// ローカルに保存されているすべての銘柄リストを取得
   Future<List<Stock>> getCachedStocks() async {
     final prefs = await SharedPreferences.getInstance();
@@ -40,7 +46,7 @@ class StockLocalCacheRepository {
       } catch (_) {}
     }
 
-    map[stock.stockCode] = stock.toJson();
+    map[_normalizeCode(stock.stockCode)] = stock.toJson();
     await prefs.setString(_stocksCacheKey, jsonEncode(map));
 
     // 更新日時の記録
@@ -51,7 +57,7 @@ class StockLocalCacheRepository {
         timeMap = Map<String, dynamic>.from(jsonDecode(timeJsonStr));
       } catch (_) {}
     }
-    timeMap[stock.stockCode] = DateTime.now().toIso8601String();
+    timeMap[_normalizeCode(stock.stockCode)] = DateTime.now().toIso8601String();
     await prefs.setString(_stocksUpdatedTimeKey, jsonEncode(timeMap));
   }
 
@@ -67,7 +73,7 @@ class StockLocalCacheRepository {
       map.forEach((code, isoStr) {
         final dt = DateTime.tryParse(isoStr.toString());
         if (dt != null) {
-          result[code] = dt;
+          result[_normalizeCode(code)] = dt;
         }
       });
       return result;
@@ -81,10 +87,10 @@ class StockLocalCacheRepository {
     if (allMasters.isEmpty) return null;
 
     final cachedStocks = await getCachedStocks();
-    final cachedCodes = cachedStocks.map((s) => s.stockCode).toSet();
+    final cachedCodes = cachedStocks.map((s) => _normalizeCode(s.stockCode)).toSet();
 
     // 1. まだローカルに保存されていない（未取得）銘柄があれば、コードの若い順に最優先取得
-    final unsyncedMasters = allMasters.where((m) => !cachedCodes.contains(m.code)).toList();
+    final unsyncedMasters = allMasters.where((m) => !cachedCodes.contains(_normalizeCode(m.code))).toList();
     if (unsyncedMasters.isNotEmpty) {
       unsyncedMasters.sort((a, b) => a.code.compareTo(b.code));
       return unsyncedMasters.first;
@@ -93,8 +99,8 @@ class StockLocalCacheRepository {
     // 2. 全銘柄が保存済みの場合は、最終更新日時が「最も古い銘柄」を次の同期ターゲットにする
     final timeMap = await getUpdatedTimeMap();
     allMasters.sort((a, b) {
-      final timeA = timeMap[a.code] ?? DateTime.fromMillisecondsSinceEpoch(0);
-      final timeB = timeMap[b.code] ?? DateTime.fromMillisecondsSinceEpoch(0);
+    final timeA = timeMap[_normalizeCode(a.code)] ?? DateTime.fromMillisecondsSinceEpoch(0);
+    final timeB = timeMap[_normalizeCode(b.code)] ?? DateTime.fromMillisecondsSinceEpoch(0);
       return timeA.compareTo(timeB);
     });
 

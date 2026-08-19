@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:finance/core/api_error.dart';
 import 'package:finance/features/stock_search/application/stock_search_controller.dart';
-import 'package:finance/features/stock_data/application/stock_data_controller.dart';
 
 class SearchResultsPage extends ConsumerWidget {
   const SearchResultsPage({super.key});
@@ -25,21 +24,15 @@ class SearchResultsPage extends ConsumerWidget {
             itemCount: stocks.length,
             itemBuilder: (context, index) {
               final stock = stocks[index];
-              final valuationAsync = ref.watch(stockValuationMetricsProvider(stock.stockCode));
-              final valuation = valuationAsync.value;
 
-              final perVal = stock.forecastPER ?? valuation?.per;
-              final pbrVal = stock.pbr ?? valuation?.pbr;
-              final psrVal = valuation?.psr;
-              final pegVal = valuation?.peg;
-              final yieldVal = stock.forecastDividendYield ?? valuation?.dividendYield;
+              final perVal = stock.forecastPER;
+              final pbrVal = stock.pbr;
+              final yieldVal = stock.forecastDividendYield;
               final revGrowthVal = stock.revenueGrowthRate;
               final equityRatioVal = stock.equityRatio;
 
               final perText = perVal != null && perVal > 0 ? '$perVal倍' : '--';
               final pbrText = pbrVal != null && pbrVal > 0 ? '$pbrVal倍' : '--';
-              final psrText = psrVal != null && psrVal > 0 ? '$psrVal倍' : '--';
-              final pegText = pegVal != null && pegVal > 0 ? '$pegVal倍' : '--';
               final yieldText = yieldVal != null && yieldVal > 0 ? '$yieldVal%' : '--';
               final revGrowthText = revGrowthVal != null ? '$revGrowthVal%' : '--';
               final equityRatioText = equityRatioVal != null && equityRatioVal > 0 ? '$equityRatioVal%' : '--';
@@ -119,8 +112,8 @@ class SearchResultsPage extends ConsumerWidget {
                           children: [
                             _buildMetricChip('PER', perText),
                             _buildMetricChip('PBR', pbrText),
-                            _buildMetricChip('PSR', psrText),
-                            _buildMetricChip('PEG', pegText, isSimplePeg: pegVal != null),
+                            _buildMetricChip('PSR', '--'),
+                            _buildMetricChip('PEG', '--'),
                             _buildMetricChip('配当利回り', yieldText),
                             _buildMetricChip('売上成長率', revGrowthText),
                             _buildMetricChip('自己資本比率', equityRatioText),
@@ -243,19 +236,12 @@ class SearchResultsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildMetricChip(String label, String value, {bool isSimplePeg = false}) {
+  Widget _buildMetricChip(String label, String value) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text('$label: ', style: const TextStyle(fontSize: 12, color: Colors.grey)),
         Text(value, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-        if (isSimplePeg) ...[
-          const SizedBox(width: 2),
-          const Tooltip(
-            message: '過去実績ベースの簡易計算PEGです',
-            child: Icon(Icons.info_outline, size: 12, color: Colors.grey),
-          ),
-        ],
       ],
     );
   }
