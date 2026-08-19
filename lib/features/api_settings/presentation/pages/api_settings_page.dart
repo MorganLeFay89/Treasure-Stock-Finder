@@ -1,8 +1,72 @@
 import 'package:flutter/material.dart';
 import 'package:finance/core/env_config.dart';
+import 'package:finance/features/stock_data/data/stock_local_cache_repository.dart';
 
-class ApiSettingsPage extends StatelessWidget {
+class ApiSettingsPage extends StatefulWidget {
   const ApiSettingsPage({super.key});
+
+  @override
+  State<ApiSettingsPage> createState() => _ApiSettingsPageState();
+}
+
+class _ApiSettingsPageState extends State<ApiSettingsPage> {
+  bool _isLocalDataFetchPaused = false;
+  final StockLocalCacheRepository _stockLocalCacheRepository = StockLocalCacheRepository();
+
+  Future<void> _clearLocalDataOnce() async {
+    final firstConfirmation = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('ローカルデータ削除'),
+        content: const Text('保存済みのローカル銘柄データを削除します。よろしいですか？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('キャンセル'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('削除する'),
+          ),
+        ],
+      ),
+    );
+
+    if (firstConfirmation != true || !mounted) {
+      return;
+    }
+
+    final secondConfirmation = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('最終確認'),
+        content: const Text('この操作は取り消せません。本当にローカルデータを削除しますか？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('キャンセル'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('削除を実行'),
+          ),
+        ],
+      ),
+    );
+
+    if (secondConfirmation != true || !mounted) {
+      return;
+    }
+
+    await _stockLocalCacheRepository.clearAllCache();
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('ローカルデータを削除しました。')),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +134,68 @@ class ApiSettingsPage extends StatelessWidget {
               guideUrl: 'https://aistudio.google.com/app/apikey',
             ),
 
+            const SizedBox(height: 24),
+            Card(
+              elevation: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  children: [
+                    const Expanded(
+                      child: Text(
+                        'ローカルデータ取得を一時停止',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    Switch(
+                      value: _isLocalDataFetchPaused,
+                      onChanged: (value) {
+                        setState(() {
+                          _isLocalDataFetchPaused = value;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _isLocalDataFetchPaused
+                  ? '現在、ローカルデータの取得は一時停止中です。'
+                  : '現在、ローカルデータの取得は有効です。',
+              style: TextStyle(
+                fontSize: 13,
+                color: _isLocalDataFetchPaused ? Colors.orange.shade800 : Colors.green.shade800,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Card(
+              elevation: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'ローカルデータを一度削除',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      '保存済みのローカル銘柄キャッシュを削除します。次回取得時に再作成されます。',
+                      style: TextStyle(fontSize: 13),
+                    ),
+                    const SizedBox(height: 12),
+                    FilledButton.tonal(
+                      onPressed: _clearLocalDataOnce,
+                      child: const Text('ローカルデータを削除'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
             const SizedBox(height: 24),
             const Text(
               'APIキーの設定方法',

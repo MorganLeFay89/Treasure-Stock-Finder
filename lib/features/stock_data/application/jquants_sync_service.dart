@@ -5,7 +5,9 @@ import 'package:finance/core/api_error.dart';
 import 'package:finance/core/env_config.dart';
 import 'package:finance/features/stock_data/application/valuation_calculator.dart';
 import 'package:finance/features/stock_data/data/jquants_api_client.dart';
+import 'package:finance/features/stock_data/data/edinet_api_client.dart';
 import 'package:finance/features/stock_data/data/stock_local_cache_repository.dart';
+import 'package:finance/features/stock_data/data/edinet_local_cache_repository.dart';
 import 'package:finance/features/stock_data/domain/stock_master.dart';
 import 'package:finance/features/stock_search/domain/stock.dart';
 
@@ -61,16 +63,22 @@ final jquantsSyncServiceProvider =
 
 class JQuantsSyncNotifier extends StateNotifier<SyncProgressStatus> {
   final JQuantsApiClient _apiClient;
+  final EdinetApiClient _edinetApiClient;
   final StockLocalCacheRepository _cacheRepo;
+  final EdinetLocalCacheRepository _edinetCacheRepo;
   Timer? _timer;
   List<StockMaster> _stockMasters = [];
   bool _isProcessingStep = false;
 
   JQuantsSyncNotifier({
     JQuantsApiClient? apiClient,
+    EdinetApiClient? edinetApiClient,
     StockLocalCacheRepository? cacheRepo,
+    EdinetLocalCacheRepository? edinetCacheRepo,
   })  : _apiClient = apiClient ?? JQuantsApiClient(),
+        _edinetApiClient = edinetApiClient ?? EdinetApiClient(),
         _cacheRepo = cacheRepo ?? StockLocalCacheRepository(),
+        _edinetCacheRepo = edinetCacheRepo ?? EdinetLocalCacheRepository(),
         super(const SyncProgressStatus()) {
     _initAndStart();
   }
@@ -93,7 +101,7 @@ class JQuantsSyncNotifier extends StateNotifier<SyncProgressStatus> {
       );
 
       // 5リクエスト/分 (約12秒〜15秒に1リクエスト) に抑える安全タイマー
-      // 1銘柄につき株価・財務の2リクエストを行うため、25秒間隔で実行
+      // 1銘柄につきJ-Quants株価・財務およびEDINET書類を統合取得するため、25秒間隔で実行
       _timer?.cancel();
       _timer = Timer.periodic(const Duration(seconds: 25), (_) {
         _syncStep();
@@ -128,9 +136,17 @@ class JQuantsSyncNotifier extends StateNotifier<SyncProgressStatus> {
 
     try {
       if (kDebugMode) {
-        print('[JQuantsSyncNotifier] 同期ターゲット選択: ${targetMaster.code} ${targetMaster.name}');
+        print('[JQuantsSyncNotifier] 統合同期ターゲット選択: ${targetMaster.code} ${targetMaster.name}');
       }
 
+      // ETF / 投信かどうかの判定
+      final isEtf = targetMaster.market.contains('ETF') ||
+          targetMaster.sector.contains('ETF') ||
+          targetMaster.sector.contains('投信') ||
+          targetMaster.name.contains('ETF');
+      final String? note = isEtf ? '※ ETF/投資信託のため財務指標（売上高・利益等）はありません' : null;
+
+      // 1. J-Quants 株価・財務データ取得
       final prices = await _apiClient.fetchDailyPrices(code: targetMaster.code);
       final financials = await _apiClient.fetchFinancialStatements(code: targetMaster.code);
 
@@ -165,26 +181,52 @@ class JQuantsSyncNotifier extends StateNotifier<SyncProgressStatus> {
         bps: latestFinancial?.bps,
       );
 
+      final equityRatio = ValuationCalculator.calculateEquityRatio(
+        directEquityRatio: latestFinancial?.equityRatio,
+        equity: latestFinancial?.equity,
+        totalAssets: latestFinancial?.totalAssets,
+      );
+
       final stock = Stock(
-        stockCode: targetMaster.code,
+        stockCode: JQuantsApiClient.normalizeCode(targetMaster.code),
         stockName: targetMaster.name,
         market: targetMaster.market,
         industry: targetMaster.sector,
-        revenueGrowthRate: revenueGrowth ?? 0.0,
-        operatingProfitGrowthRate: opGrowth ?? 0.0,
-        profitMargin: profitMargin ?? 0.0,
-        forecastPER: metrics.per ?? 0.0,
-        pbr: metrics.pbr ?? 0.0,
-        forecastDividendYield: metrics.dividendYield ?? 0.0,
-        roe: roe ?? 0.0,
-        roa: 0.0,
-        equityRatio: 0.0,
-        marketCap: metrics.marketCap?.toInt() ?? 0,
+        revenueGrowthRate: revenueGrowth,
+        operatingProfitGrowthRate: opGrowth,
+        profitMargin: profitMargin,
+        forecastPER: metrics.per,
+        pbr: metrics.pbr,
+        forecastDividendYield: metrics.dividendYield,
+        roe: roe,
+        roa: null,
+        equityRatio: equityRatio,
+        marketCap: metrics.marketCap?.toInt(),
         aiScore: null,
+        note: note,
       );
 
-      // ローカル保存（最終更新日時も自動記録）
+      // J-Quantsデータをローカル保存（最終更新日時も自動記録）
       await _cacheRepo.saveStock(stock);
+
+      // 2. EDINET データ取得 & ローカル保存
+      if (EnvConfig.isEdinetApiKeySet) {
+        try {
+          final edinetDocs = await _edinetApiClient.searchDocumentsBySecCode(
+            secCode: targetMaster.code,
+          );
+          if (edinetDocs.isNotEmpty) {
+            await _edinetCacheRepo.saveDocuments(targetMaster.code, edinetDocs);
+            if (kDebugMode) {
+              print('[JQuantsSyncNotifier] EDINET書類保存完了 (${targetMaster.code}): ${edinetDocs.length}件');
+            }
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            print('[JQuantsSyncNotifier] EDINET取得スキップ (${targetMaster.code}): $e');
+          }
+        }
+      }
 
       final newCachedCount = await _cacheRepo.getCachedCount();
       state = state.copyWith(

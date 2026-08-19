@@ -112,4 +112,12 @@ class StockLocalCacheRepository {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_syncIndexKey, index);
   }
+
+  /// ローカルに保存した銘柄キャッシュと同期状態をすべて削除
+  Future<void> clearAllCache() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_stocksCacheKey);
+    await prefs.remove(_stocksUpdatedTimeKey);
+    await prefs.remove(_syncIndexKey);
+  }
 }

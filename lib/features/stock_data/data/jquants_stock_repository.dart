@@ -42,40 +42,46 @@ class JQuantsStockRepository implements StockRepository {
           return false;
         }
       }
-      if (condition.revenueGrowthRateMin != null && stock.revenueGrowthRate < condition.revenueGrowthRateMin!) {
+      if (condition.revenueGrowthRateMin != null && (stock.revenueGrowthRate == null || stock.revenueGrowthRate! < condition.revenueGrowthRateMin!)) {
         return false;
       }
-      if (condition.revenueGrowthRateMax != null && stock.revenueGrowthRate > condition.revenueGrowthRateMax!) {
+      if (condition.revenueGrowthRateMax != null && (stock.revenueGrowthRate == null || stock.revenueGrowthRate! > condition.revenueGrowthRateMax!)) {
         return false;
       }
-      if (condition.operatingProfitGrowthRateMin != null && stock.operatingProfitGrowthRate < condition.operatingProfitGrowthRateMin!) {
+      if (condition.operatingProfitGrowthRateMin != null && (stock.operatingProfitGrowthRate == null || stock.operatingProfitGrowthRate! < condition.operatingProfitGrowthRateMin!)) {
         return false;
       }
-      if (condition.operatingProfitGrowthRateMax != null && stock.operatingProfitGrowthRate > condition.operatingProfitGrowthRateMax!) {
+      if (condition.operatingProfitGrowthRateMax != null && (stock.operatingProfitGrowthRate == null || stock.operatingProfitGrowthRate! > condition.operatingProfitGrowthRateMax!)) {
         return false;
       }
-      if (condition.profitMarginMin != null && stock.profitMargin < condition.profitMarginMin!) {
+      if (condition.profitMarginMin != null && (stock.profitMargin == null || stock.profitMargin! < condition.profitMarginMin!)) {
         return false;
       }
-      if (condition.profitMarginMax != null && stock.profitMargin > condition.profitMarginMax!) {
+      if (condition.profitMarginMax != null && (stock.profitMargin == null || stock.profitMargin! > condition.profitMarginMax!)) {
         return false;
       }
-      if (condition.forecastPERMin != null && (stock.forecastPER == 0.0 || stock.forecastPER < condition.forecastPERMin!)) {
+      if (condition.forecastPERMin != null && (stock.forecastPER == null || stock.forecastPER! < condition.forecastPERMin!)) {
         return false;
       }
-      if (condition.forecastPERMax != null && (stock.forecastPER == 0.0 || stock.forecastPER > condition.forecastPERMax!)) {
+      if (condition.forecastPERMax != null && (stock.forecastPER == null || stock.forecastPER! > condition.forecastPERMax!)) {
         return false;
       }
-      if (condition.pbrMin != null && (stock.pbr == 0.0 || stock.pbr < condition.pbrMin!)) {
+      if (condition.pbrMin != null && (stock.pbr == null || stock.pbr! < condition.pbrMin!)) {
         return false;
       }
-      if (condition.pbrMax != null && (stock.pbr == 0.0 || stock.pbr > condition.pbrMax!)) {
+      if (condition.pbrMax != null && (stock.pbr == null || stock.pbr! > condition.pbrMax!)) {
         return false;
       }
-      if (condition.forecastDividendYieldMin != null && stock.forecastDividendYield < condition.forecastDividendYieldMin!) {
+      if (condition.forecastDividendYieldMin != null && (stock.forecastDividendYield == null || stock.forecastDividendYield! < condition.forecastDividendYieldMin!)) {
         return false;
       }
-      if (condition.forecastDividendYieldMax != null && stock.forecastDividendYield > condition.forecastDividendYieldMax!) {
+      if (condition.forecastDividendYieldMax != null && (stock.forecastDividendYield == null || stock.forecastDividendYield! > condition.forecastDividendYieldMax!)) {
+        return false;
+      }
+      if (condition.equityRatioMin != null && (stock.equityRatio == null || stock.equityRatio! < condition.equityRatioMin!)) {
+        return false;
+      }
+      if (condition.equityRatioMax != null && (stock.equityRatio == null || stock.equityRatio! > condition.equityRatioMax!)) {
         return false;
       }
       return true;

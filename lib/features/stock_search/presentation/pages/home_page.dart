@@ -159,6 +159,16 @@ class HomePage extends ConsumerWidget {
                       ref.read(stockSearchConditionProvider.notifier).update((state) => state.copyWith(forecastDividendYieldMax: double.tryParse(val)));
                     },
                   ),
+                  RangeInputWidget(
+                    label: '自己資本比率',
+                    unit: '%',
+                    onChangedMin: (val) {
+                      ref.read(stockSearchConditionProvider.notifier).update((state) => state.copyWith(equityRatioMin: double.tryParse(val)));
+                    },
+                    onChangedMax: (val) {
+                      ref.read(stockSearchConditionProvider.notifier).update((state) => state.copyWith(equityRatioMax: double.tryParse(val)));
+                    },
+                  ),
                   const SizedBox(height: 16),
                   const Text('市場', style: TextStyle(fontWeight: FontWeight.bold)),
                   DropdownButton<String>(

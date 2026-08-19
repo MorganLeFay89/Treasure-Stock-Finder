@@ -33,6 +33,8 @@ class SearchHistoryNotifier extends AsyncNotifier<List<SearchHistoryItem>> {
     if (condition.pbrMax != null) summaryParts.add('PBR<= ${condition.pbrMax}倍');
     if (condition.revenueGrowthRateMin != null) summaryParts.add('売上成長率>= ${condition.revenueGrowthRateMin}%');
     if (condition.forecastDividendYieldMin != null) summaryParts.add('配当利回り>= ${condition.forecastDividendYieldMin}%');
+    if (condition.equityRatioMin != null) summaryParts.add('自己資本比率>= ${condition.equityRatioMin}%');
+    if (condition.equityRatioMax != null) summaryParts.add('自己資本比率<= ${condition.equityRatioMax}%');
 
     final displayName = summaryParts.isNotEmpty ? summaryParts.join(' / ') : '全銘柄検索';
 

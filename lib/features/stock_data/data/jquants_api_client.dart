@@ -21,6 +21,15 @@ class JQuantsApiClient {
     return {'x-api-key': EnvConfig.jquantsApiKey};
   }
 
+  /// 5桁コード（例: 13010）を4桁コード（例: 1301）に正規化
+  static String normalizeCode(String code) {
+    final trimmed = code.trim();
+    if (trimmed.length == 5 && trimmed.endsWith('0')) {
+      return trimmed.substring(0, 4);
+    }
+    return trimmed;
+  }
+
   /// pagination_key 付きレスポンスをすべて結合して返す
   Future<List<Map<String, dynamic>>> _fetchAllData(
     String path, {
@@ -71,7 +80,7 @@ class JQuantsApiClient {
   Future<List<StockMaster>> fetchStockList({String? code}) async {
     final params = <String, String>{};
     if (code != null && code.isNotEmpty) {
-      params['code'] = code;
+      params['code'] = normalizeCode(code);
     }
 
     final rows = await _fetchAllData('/equities/master', queryParameters: params);
@@ -84,7 +93,8 @@ class JQuantsApiClient {
     String? from,
     String? to,
   }) async {
-    final params = <String, String>{'code': code};
+    final normalized = normalizeCode(code);
+    final params = <String, String>{'code': normalized};
 
     if (from != null && from.isNotEmpty) {
       params['from'] = from;
@@ -107,9 +117,10 @@ class JQuantsApiClient {
   Future<List<FinancialSummary>> fetchFinancialStatements({
     required String code,
   }) async {
+    final normalized = normalizeCode(code);
     final rows = await _fetchAllData(
       '/fins/summary',
-      queryParameters: {'code': code},
+      queryParameters: {'code': normalized},
     );
     final summaries = rows.map(FinancialSummary.fromJson).toList();
     summaries.sort((a, b) => a.periodEnd.compareTo(b.periodEnd));

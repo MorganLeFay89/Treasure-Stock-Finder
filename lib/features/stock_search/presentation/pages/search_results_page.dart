@@ -28,11 +28,21 @@ class SearchResultsPage extends ConsumerWidget {
               final valuationAsync = ref.watch(stockValuationMetricsProvider(stock.stockCode));
               final valuation = valuationAsync.value;
 
-              final perText = stock.forecastPER > 0 ? '${stock.forecastPER}倍' : (valuation?.per != null ? '${valuation!.per}倍' : '--');
-              final pbrText = stock.pbr > 0 ? '${stock.pbr}倍' : (valuation?.pbr != null ? '${valuation!.pbr}倍' : '--');
-              final psrText = valuation?.psr != null ? '${valuation!.psr}倍' : '--';
-              final pegText = valuation?.peg != null ? '${valuation!.peg}倍' : '--';
-              final yieldText = stock.forecastDividendYield > 0 ? '${stock.forecastDividendYield}%' : (valuation?.dividendYield != null ? '${valuation!.dividendYield}%' : '--');
+              final perVal = stock.forecastPER ?? valuation?.per;
+              final pbrVal = stock.pbr ?? valuation?.pbr;
+              final psrVal = valuation?.psr;
+              final pegVal = valuation?.peg;
+              final yieldVal = stock.forecastDividendYield ?? valuation?.dividendYield;
+              final revGrowthVal = stock.revenueGrowthRate;
+              final equityRatioVal = stock.equityRatio;
+
+              final perText = perVal != null && perVal > 0 ? '$perVal倍' : '--';
+              final pbrText = pbrVal != null && pbrVal > 0 ? '$pbrVal倍' : '--';
+              final psrText = psrVal != null && psrVal > 0 ? '$psrVal倍' : '--';
+              final pegText = pegVal != null && pegVal > 0 ? '$pegVal倍' : '--';
+              final yieldText = yieldVal != null && yieldVal > 0 ? '$yieldVal%' : '--';
+              final revGrowthText = revGrowthVal != null ? '$revGrowthVal%' : '--';
+              final equityRatioText = equityRatioVal != null && equityRatioVal > 0 ? '$equityRatioVal%' : '--';
 
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -50,10 +60,31 @@ class SearchResultsPage extends ConsumerWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Expanded(
-                              child: Text(
-                                '${stock.stockCode} ${stock.stockName}',
-                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                overflow: TextOverflow.ellipsis,
+                              child: Row(
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      '${stock.displayCode} ${stock.stockName}',
+                                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  if (stock.isEtf) ...[
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: Colors.purple.shade50,
+                                        borderRadius: BorderRadius.circular(4),
+                                        border: Border.all(color: Colors.purple.shade200),
+                                      ),
+                                      child: Text(
+                                        'ETF/投信',
+                                        style: TextStyle(fontSize: 11, color: Colors.purple.shade800, fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ],
+                                ],
                               ),
                             ),
                             Container(
@@ -74,6 +105,13 @@ class SearchResultsPage extends ConsumerWidget {
                           stock.industry,
                           style: const TextStyle(fontSize: 12, color: Colors.grey),
                         ),
+                        if (stock.note != null) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            stock.note!,
+                            style: TextStyle(fontSize: 11, color: Colors.purple.shade700),
+                          ),
+                        ],
                         const Divider(height: 16),
                         Wrap(
                           spacing: 12,
@@ -82,9 +120,10 @@ class SearchResultsPage extends ConsumerWidget {
                             _buildMetricChip('PER', perText),
                             _buildMetricChip('PBR', pbrText),
                             _buildMetricChip('PSR', psrText),
-                            _buildMetricChip('PEG', pegText, isSimplePeg: valuation?.peg != null),
+                            _buildMetricChip('PEG', pegText, isSimplePeg: pegVal != null),
                             _buildMetricChip('配当利回り', yieldText),
-                            _buildMetricChip('売上成長率', '${stock.revenueGrowthRate}%'),
+                            _buildMetricChip('売上成長率', revGrowthText),
+                            _buildMetricChip('自己資本比率', equityRatioText),
                           ],
                         ),
                       ],

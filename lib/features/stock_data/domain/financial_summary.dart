@@ -10,6 +10,9 @@ class FinancialSummary {
   final double? bps;                // 1株当たり純資産
   final double? dividendPerShare;   // 1株当たり配当金
   final int? issuedShares;          // 発行済株式数
+  final double? equity;             // 自己資本（純資産）
+  final double? totalAssets;        // 総資産
+  final double? equityRatio;        // 自己資本比率 (%)
 
   const FinancialSummary({
     required this.code,
@@ -22,6 +25,9 @@ class FinancialSummary {
     this.bps,
     this.dividendPerShare,
     this.issuedShares,
+    this.equity,
+    this.totalAssets,
+    this.equityRatio,
   });
 
   factory FinancialSummary.fromJson(Map<String, dynamic> json) {
@@ -37,6 +43,16 @@ class FinancialSummary {
     } else {
       parsedDate = DateTime.now();
     }
+
+    final rawEquityRatio = _toDouble(
+      json['EqCstR'] ??
+          json['EquityToAssetRatio'] ??
+          json['equityRatio'],
+    );
+    // 0.50 のように小数表現の場合はパーセント (50.0) に変換
+    final normalizedEquityRatio = rawEquityRatio != null && rawEquityRatio > 0 && rawEquityRatio <= 1.0
+        ? rawEquityRatio * 100.0
+        : rawEquityRatio;
 
     return FinancialSummary(
       code: json['Code']?.toString() ?? json['LocalCode']?.toString() ?? json['code']?.toString() ?? '',
@@ -59,6 +75,9 @@ class FinancialSummary {
             json['NumberOfIssuedAndOutstandingSharesAtTheEndOfFiscalYearIncludingTreasuryStock'] ??
             json['issuedShares'],
       ),
+      equity: _toDouble(json['Eq'] ?? json['Equity'] ?? json['equity']),
+      totalAssets: _toDouble(json['TA'] ?? json['TotalAssets'] ?? json['totalAssets']),
+      equityRatio: normalizedEquityRatio,
     );
   }
 
@@ -86,6 +105,9 @@ class FinancialSummary {
       'bps': bps,
       'dividendPerShare': dividendPerShare,
       'issuedShares': issuedShares,
+      'equity': equity,
+      'totalAssets': totalAssets,
+      'equityRatio': equityRatio,
     };
   }
 }

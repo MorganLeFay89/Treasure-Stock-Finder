@@ -29,6 +29,17 @@ class StockDetailPage extends ConsumerWidget {
       edinetDocs: edinetDocs,
     );
 
+    final perVal = stock.forecastPER ?? valuation?.per;
+    final pbrVal = stock.pbr ?? valuation?.pbr;
+    final psrVal = valuation?.psr;
+    final pegVal = valuation?.peg;
+    final yieldVal = stock.forecastDividendYield ?? valuation?.dividendYield;
+    final revGrowthVal = stock.revenueGrowthRate;
+    final opGrowthVal = stock.operatingProfitGrowthRate;
+    final marginVal = stock.profitMargin;
+    final roeVal = stock.roe;
+    final equityRatioVal = stock.equityRatio;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(stock.stockName),
@@ -59,7 +70,7 @@ class StockDetailPage extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  stock.stockCode,
+                  stock.displayCode,
                   style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.grey),
                 ),
                 Text(
@@ -74,6 +85,32 @@ class StockDetailPage extends ConsumerWidget {
               style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
             Text(stock.industry, style: const TextStyle(fontSize: 16)),
+
+            if (stock.isEtf || stock.note != null) ...[
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.purple.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.purple.shade200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, color: Colors.purple.shade800, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        stock.note ?? '※ 本銘柄はETF/投資信託のため、企業の決算財務諸表（売上高・利益成長率・ROE等）は公表されていません。',
+                        style: TextStyle(fontSize: 13, color: Colors.purple.shade900, fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
             const Divider(height: 32),
 
             // 財務・バリュエーション指標
@@ -82,53 +119,16 @@ class StockDetailPage extends ConsumerWidget {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-            _buildInfoRow('売上高成長率', '${stock.revenueGrowthRate}%'),
-            _buildInfoRow('営業利益成長率', '${stock.operatingProfitGrowthRate}%'),
-            _buildInfoRow('利益率', '${stock.profitMargin}%'),
-            _buildInfoRow('予想PER', stock.forecastPER > 0 ? '${stock.forecastPER}倍' : (valuation?.per != null ? '${valuation!.per}倍' : '--')),
-            _buildInfoRow('PBR', stock.pbr > 0 ? '${stock.pbr}倍' : (valuation?.pbr != null ? '${valuation!.pbr}倍' : '--')),
-            _buildInfoRow('PSR (株価売上高倍率)', valuation?.psr != null ? '${valuation!.psr}倍' : '--'),
-            _buildInfoRow('PEG レシオ (実績ベース)', valuation?.peg != null ? '${valuation!.peg}倍' : '--'),
-            _buildInfoRow('予想配当利回り', stock.forecastDividendYield > 0 ? '${stock.forecastDividendYield}%' : (valuation?.dividendYield != null ? '${valuation!.dividendYield}%' : '--')),
-            _buildInfoRow('ROE', '${stock.roe}%'),
-            _buildInfoRow('ROA', '${stock.roa}%'),
-            _buildInfoRow('自己資本比率', '${stock.equityRatio}%'),
-
-            const Divider(height: 32),
-
-            // EDINET 開示書類一覧
-            const Text(
-              'EDINET 開示書類 (直近)',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            edinetDocsAsync.when(
-              data: (docs) {
-                if (docs.isEmpty) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text('※直近の開示書類が見つからないか、EDINET APIキーが未設定です。', style: TextStyle(color: Colors.grey, fontSize: 13)),
-                  );
-                }
-                return ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: docs.length > 5 ? 5 : docs.length,
-                  itemBuilder: (context, index) {
-                    final doc = docs[index];
-                    return ListTile(
-                      dense: true,
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.description_outlined, color: Colors.blue),
-                      title: Text('${doc.docTypeName} (${doc.submitDateTime.toString().substring(0, 10)})'),
-                      subtitle: Text(doc.docDescription, maxLines: 1, overflow: TextOverflow.ellipsis),
-                    );
-                  },
-                );
-              },
-              loading: () => const Center(child: Padding(padding: EdgeInsets.all(16.0), child: CircularProgressIndicator())),
-              error: (err, stack) => Text('EDINET取得エラー: $err', style: const TextStyle(color: Colors.grey)),
-            ),
+            _buildInfoRow('売上高成長率', revGrowthVal != null ? '$revGrowthVal%' : '--'),
+            _buildInfoRow('営業利益成長率', opGrowthVal != null ? '$opGrowthVal%' : '--'),
+            _buildInfoRow('利益率', marginVal != null ? '$marginVal%' : '--'),
+            _buildInfoRow('予想PER', perVal != null && perVal > 0 ? '$perVal倍' : '--'),
+            _buildInfoRow('PBR', pbrVal != null && pbrVal > 0 ? '$pbrVal倍' : '--'),
+            _buildInfoRow('PSR (株価売上高倍率)', psrVal != null && psrVal > 0 ? '$psrVal倍' : '--'),
+            _buildInfoRow('PEG レシオ (実績ベース)', pegVal != null && pegVal > 0 ? '$pegVal倍' : '--'),
+            _buildInfoRow('予想配当利回り', yieldVal != null && yieldVal > 0 ? '$yieldVal%' : '--'),
+            _buildInfoRow('ROE', roeVal != null ? '$roeVal%' : '--'),
+            _buildInfoRow('自己資本比率', equityRatioVal != null && equityRatioVal > 0 ? '$equityRatioVal%' : '--'),
 
             const Divider(height: 32),
 

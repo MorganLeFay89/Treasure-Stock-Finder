@@ -64,6 +64,19 @@ class ValuationCalculator {
     return double.parse(((eps / bps) * 100).toStringAsFixed(2));
   }
 
+  /// 自己資本比率(%) = 自己資本 / 総資産 * 100
+  static double? calculateEquityRatio({
+    double? directEquityRatio,
+    double? equity,
+    double? totalAssets,
+  }) {
+    if (directEquityRatio != null && directEquityRatio > 0) {
+      return double.parse(directEquityRatio.toStringAsFixed(2));
+    }
+    if (equity == null || totalAssets == null || totalAssets <= 0) return null;
+    return double.parse(((equity / totalAssets) * 100).toStringAsFixed(2));
+  }
+
   /// EPS成長率(%) = (直近EPS / 前期EPS - 1) * 100
   static double? calculateEpsGrowthRate({double? currentEps, double? previousEps}) {
     if (currentEps == null || previousEps == null || previousEps <= 0) return null;

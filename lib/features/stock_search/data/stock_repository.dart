@@ -90,18 +90,20 @@ class MockStockRepository implements StockRepository {
 
     // モックでの簡易フィルタリング
     return mockStocks.where((stock) {
-      if (condition.revenueGrowthRateMin != null && stock.revenueGrowthRate < condition.revenueGrowthRateMin!) return false;
-      if (condition.revenueGrowthRateMax != null && stock.revenueGrowthRate > condition.revenueGrowthRateMax!) return false;
-      if (condition.operatingProfitGrowthRateMin != null && stock.operatingProfitGrowthRate < condition.operatingProfitGrowthRateMin!) return false;
-      if (condition.operatingProfitGrowthRateMax != null && stock.operatingProfitGrowthRate > condition.operatingProfitGrowthRateMax!) return false;
-      if (condition.profitMarginMin != null && stock.profitMargin < condition.profitMarginMin!) return false;
-      if (condition.profitMarginMax != null && stock.profitMargin > condition.profitMarginMax!) return false;
-      if (condition.forecastPERMin != null && stock.forecastPER < condition.forecastPERMin!) return false;
-      if (condition.forecastPERMax != null && stock.forecastPER > condition.forecastPERMax!) return false;
-      if (condition.pbrMin != null && stock.pbr < condition.pbrMin!) return false;
-      if (condition.pbrMax != null && stock.pbr > condition.pbrMax!) return false;
-      if (condition.forecastDividendYieldMin != null && stock.forecastDividendYield < condition.forecastDividendYieldMin!) return false;
-      if (condition.forecastDividendYieldMax != null && stock.forecastDividendYield > condition.forecastDividendYieldMax!) return false;
+      if (condition.revenueGrowthRateMin != null && (stock.revenueGrowthRate == null || stock.revenueGrowthRate! < condition.revenueGrowthRateMin!)) return false;
+      if (condition.revenueGrowthRateMax != null && (stock.revenueGrowthRate == null || stock.revenueGrowthRate! > condition.revenueGrowthRateMax!)) return false;
+      if (condition.operatingProfitGrowthRateMin != null && (stock.operatingProfitGrowthRate == null || stock.operatingProfitGrowthRate! < condition.operatingProfitGrowthRateMin!)) return false;
+      if (condition.operatingProfitGrowthRateMax != null && (stock.operatingProfitGrowthRate == null || stock.operatingProfitGrowthRate! > condition.operatingProfitGrowthRateMax!)) return false;
+      if (condition.profitMarginMin != null && (stock.profitMargin == null || stock.profitMargin! < condition.profitMarginMin!)) return false;
+      if (condition.profitMarginMax != null && (stock.profitMargin == null || stock.profitMargin! > condition.profitMarginMax!)) return false;
+      if (condition.forecastPERMin != null && (stock.forecastPER == null || stock.forecastPER! < condition.forecastPERMin!)) return false;
+      if (condition.forecastPERMax != null && (stock.forecastPER == null || stock.forecastPER! > condition.forecastPERMax!)) return false;
+      if (condition.pbrMin != null && (stock.pbr == null || stock.pbr! < condition.pbrMin!)) return false;
+      if (condition.pbrMax != null && (stock.pbr == null || stock.pbr! > condition.pbrMax!)) return false;
+      if (condition.forecastDividendYieldMin != null && (stock.forecastDividendYield == null || stock.forecastDividendYield! < condition.forecastDividendYieldMin!)) return false;
+      if (condition.forecastDividendYieldMax != null && (stock.forecastDividendYield == null || stock.forecastDividendYield! > condition.forecastDividendYieldMax!)) return false;
+      if (condition.equityRatioMin != null && (stock.equityRatio == null || stock.equityRatio! < condition.equityRatioMin!)) return false;
+      if (condition.equityRatioMax != null && (stock.equityRatio == null || stock.equityRatio! > condition.equityRatioMax!)) return false;
       if (condition.market != null && condition.market != "全市場" && stock.market != condition.market) return false;
       
       return true;

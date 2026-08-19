@@ -27,7 +27,7 @@ class FavoritePage extends ConsumerWidget {
               final stock = stocks[index];
               return ListTile(
                 title: Text(stock.stockName),
-                subtitle: Text('${stock.stockCode} | ${stock.market}'),
+                subtitle: Text('${stock.displayCode} | ${stock.market}'),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {
                   context.push('/stock_detail', extra: stock);
