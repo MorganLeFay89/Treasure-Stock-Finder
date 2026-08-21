@@ -9,6 +9,7 @@ import 'package:finance/features/stock_data/data/edinet_api_client.dart';
 import 'package:finance/features/stock_data/data/stock_local_cache_repository.dart';
 import 'package:finance/features/stock_data/data/edinet_local_cache_repository.dart';
 import 'package:finance/features/stock_data/domain/stock_master.dart';
+import 'package:finance/features/stock_data/domain/financial_summary.dart';
 import 'package:finance/features/stock_search/domain/stock.dart';
 
 /// 同期進捗ステータスモデル
@@ -154,11 +155,36 @@ class JQuantsSyncNotifier extends StateNotifier<SyncProgressStatus> {
       final latestFinancial = financials.isNotEmpty ? financials.last : null;
       final previousFinancial = financials.length >= 2 ? financials[financials.length - 2] : null;
 
+      final effectiveDividend = FinancialSummary.findLatestEffectiveDividend(financials);
+      final effectiveFinancials = FinancialSummary.findLatestEffectiveFinancials(financials);
+
+      // 最新レコードでEPS/BPSが"-"などで欠損している場合、より古いレコードから補完
+      final patchedFinancial = latestFinancial == null
+          ? null
+          : (latestFinancial.eps != null && latestFinancial.bps != null)
+              ? latestFinancial
+              : FinancialSummary(
+                  code: latestFinancial.code,
+                  periodEnd: latestFinancial.periodEnd,
+                  revenue: latestFinancial.revenue,
+                  operatingProfit: latestFinancial.operatingProfit,
+                  ordinaryProfit: latestFinancial.ordinaryProfit,
+                  netIncome: latestFinancial.netIncome,
+                  eps: latestFinancial.eps ?? effectiveFinancials.eps,
+                  bps: latestFinancial.bps ?? effectiveFinancials.bps,
+                  dividendPerShare: latestFinancial.dividendPerShare,
+                  issuedShares: latestFinancial.issuedShares,
+                  equity: latestFinancial.equity,
+                  totalAssets: latestFinancial.totalAssets,
+                  equityRatio: latestFinancial.equityRatio,
+                );
+
       final metrics = ValuationCalculator.calculateMetrics(
         code: targetMaster.code,
         latestPrice: latestPrice,
-        latestFinancial: latestFinancial,
+        latestFinancial: patchedFinancial,
         previousFinancial: previousFinancial,
+        effectiveDividend: effectiveDividend,
       );
 
       final revenueGrowth = ValuationCalculator.calculateRevenueGrowthRate(
@@ -177,8 +203,8 @@ class JQuantsSyncNotifier extends StateNotifier<SyncProgressStatus> {
       );
 
       final roe = ValuationCalculator.calculateROE(
-        eps: latestFinancial?.eps,
-        bps: latestFinancial?.bps,
+        eps: patchedFinancial?.eps,
+        bps: patchedFinancial?.bps,
       );
 
       final equityRatio = ValuationCalculator.calculateEquityRatio(
@@ -197,6 +223,8 @@ class JQuantsSyncNotifier extends StateNotifier<SyncProgressStatus> {
         profitMargin: profitMargin,
         forecastPER: metrics.per,
         pbr: metrics.pbr,
+        psr: metrics.psr,
+        peg: metrics.peg,
         forecastDividendYield: metrics.dividendYield,
         roe: roe,
         roa: null,

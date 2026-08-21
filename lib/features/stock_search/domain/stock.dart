@@ -9,6 +9,8 @@ class Stock {
   final double? profitMargin;
   final double? forecastPER;
   final double? pbr;
+  final double? psr;
+  final double? peg;
   final double? forecastDividendYield;
   final double? roe;
   final double? roa;
@@ -27,6 +29,8 @@ class Stock {
     this.profitMargin,
     this.forecastPER,
     this.pbr,
+    this.psr,
+    this.peg,
     this.forecastDividendYield,
     this.roe,
     this.roa,
@@ -58,6 +62,8 @@ class Stock {
     double? profitMargin,
     double? forecastPER,
     double? pbr,
+    double? psr,
+    double? peg,
     double? forecastDividendYield,
     double? roe,
     double? roa,
@@ -76,6 +82,8 @@ class Stock {
       profitMargin: profitMargin ?? this.profitMargin,
       forecastPER: forecastPER ?? this.forecastPER,
       pbr: pbr ?? this.pbr,
+      psr: psr ?? this.psr,
+      peg: peg ?? this.peg,
       forecastDividendYield: forecastDividendYield ?? this.forecastDividendYield,
       roe: roe ?? this.roe,
       roa: roa ?? this.roa,
@@ -97,6 +105,8 @@ class Stock {
       profitMargin: _toDouble(json['profitMargin']),
       forecastPER: _toDouble(json['forecastPER']),
       pbr: _toDouble(json['pbr']),
+      psr: _toDouble(json['psr']),
+      peg: _toDouble(json['peg']),
       forecastDividendYield: _toDouble(json['forecastDividendYield']),
       roe: _toDouble(json['roe']),
       roa: _toDouble(json['roa']),
@@ -130,6 +140,8 @@ class Stock {
       'profitMargin': profitMargin,
       'forecastPER': forecastPER,
       'pbr': pbr,
+      'psr': psr,
+      'peg': peg,
       'forecastDividendYield': forecastDividendYield,
       'roe': roe,
       'roa': roa,

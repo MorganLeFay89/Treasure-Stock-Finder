@@ -28,15 +28,16 @@ class ValuationCalculator {
     return double.parse((marketCap / revenue).toStringAsFixed(2));
   }
 
-  /// PEG レシオ = PER / EPS成長率 (過去実績ベース簡易計算)
+  /// PEG レシオ = PER / 成長率 (EPS成長率、または営業利益/売上成長率)
   static double? calculatePEG({double? per, double? epsGrowthRate}) {
-    if (per == null || epsGrowthRate == null || epsGrowthRate <= 0) return null;
+    if (per == null || per <= 0 || epsGrowthRate == null || epsGrowthRate <= 0) return null;
     return double.parse((per / epsGrowthRate).toStringAsFixed(2));
   }
 
   /// 配当利回り(%) = 1株配当 / 株価 * 100
   static double? calculateDividendYield({double? price, double? dividendPerShare}) {
     if (price == null || dividendPerShare == null || price <= 0) return null;
+    if (dividendPerShare == 0) return 0.0;
     return double.parse(((dividendPerShare / price) * 100).toStringAsFixed(2));
   }
 
@@ -89,24 +90,32 @@ class ValuationCalculator {
     DailyStockPrice? latestPrice,
     FinancialSummary? latestFinancial,
     FinancialSummary? previousFinancial,
+    double? fallbackMarketCap,
+    double? fallbackGrowthRate,
+    double? effectiveDividend,
   }) {
     final price = latestPrice?.close;
     final eps = latestFinancial?.eps;
     final bps = latestFinancial?.bps;
     final revenue = latestFinancial?.revenue;
-    final dividend = latestFinancial?.dividendPerShare;
+    final dividend = latestFinancial?.dividendPerShare ?? effectiveDividend;
     final shares = latestFinancial?.issuedShares;
 
     final per = calculatePER(price: price, eps: eps);
     final pbr = calculatePBR(price: price, bps: bps);
-    final marketCap = calculateMarketCap(price: price, issuedShares: shares);
+    final calculatedMarketCap = calculateMarketCap(price: price, issuedShares: shares);
+    final marketCap = calculatedMarketCap ?? fallbackMarketCap;
     final psr = calculatePSR(marketCap: marketCap, revenue: revenue);
 
     final epsGrowth = calculateEpsGrowthRate(
       currentEps: eps,
       previousEps: previousFinancial?.eps,
     );
-    final peg = calculatePEG(per: per, epsGrowthRate: epsGrowth);
+    final growthRate = (epsGrowth != null && epsGrowth > 0)
+        ? epsGrowth
+        : (fallbackGrowthRate != null && fallbackGrowthRate > 0 ? fallbackGrowthRate : null);
+
+    final peg = calculatePEG(per: per, epsGrowthRate: growthRate);
     final dividendYield = calculateDividendYield(price: price, dividendPerShare: dividend);
 
     return ValuationMetrics(

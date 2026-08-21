@@ -72,6 +72,18 @@ class JQuantsStockRepository implements StockRepository {
       if (condition.pbrMax != null && (stock.pbr == null || stock.pbr! > condition.pbrMax!)) {
         return false;
       }
+      if (condition.psrMin != null && (stock.psr == null || stock.psr! < condition.psrMin!)) {
+        return false;
+      }
+      if (condition.psrMax != null && (stock.psr == null || stock.psr! > condition.psrMax!)) {
+        return false;
+      }
+      if (condition.pegMin != null && (stock.peg == null || stock.peg! < condition.pegMin!)) {
+        return false;
+      }
+      if (condition.pegMax != null && (stock.peg == null || stock.peg! > condition.pegMax!)) {
+        return false;
+      }
       if (condition.forecastDividendYieldMin != null && (stock.forecastDividendYield == null || stock.forecastDividendYield! < condition.forecastDividendYieldMin!)) {
         return false;
       }

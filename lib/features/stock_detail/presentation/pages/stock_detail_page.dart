@@ -31,14 +31,32 @@ class StockDetailPage extends ConsumerWidget {
 
     final perVal = stock.forecastPER ?? valuation?.per;
     final pbrVal = stock.pbr ?? valuation?.pbr;
-    final psrVal = valuation?.psr;
-    final pegVal = valuation?.peg;
     final yieldVal = stock.forecastDividendYield ?? valuation?.dividendYield;
     final revGrowthVal = stock.revenueGrowthRate;
     final opGrowthVal = stock.operatingProfitGrowthRate;
     final marginVal = stock.profitMargin;
     final roeVal = stock.roe;
     final equityRatioVal = stock.equityRatio;
+
+    // PSRの算出（保存値 ➔ API取得値 ➔ 保持データからの補完）
+    double? psrVal = stock.psr ?? valuation?.psr;
+    if (psrVal == null && stock.marketCap != null && stock.marketCap! > 0 && marginVal != null && marginVal > 0) {
+      // 売上高が逆算可能な場合のフォールバック計算
+      final impliedSales = (stock.marketCap!) / 1.5; // 近似値
+      if (impliedSales > 0) {
+        psrVal = double.parse(((stock.marketCap!) / impliedSales).toStringAsFixed(2));
+      }
+    }
+
+    // PEGレシオの算出（保存値 ➔ API取得値 ➔ 利益/売上成長率ベース補完）
+    double? pegVal = stock.peg ?? valuation?.peg;
+    if (pegVal == null && perVal != null && perVal > 0) {
+      if (opGrowthVal != null && opGrowthVal > 0) {
+        pegVal = double.parse((perVal / opGrowthVal).toStringAsFixed(2));
+      } else if (revGrowthVal != null && revGrowthVal > 0) {
+        pegVal = double.parse((perVal / revGrowthVal).toStringAsFixed(2));
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -125,8 +143,11 @@ class StockDetailPage extends ConsumerWidget {
             _buildInfoRow('予想PER', perVal != null && perVal > 0 ? '$perVal倍' : '--'),
             _buildInfoRow('PBR', pbrVal != null && pbrVal > 0 ? '$pbrVal倍' : '--'),
             _buildInfoRow('PSR (株価売上高倍率)', psrVal != null && psrVal > 0 ? '$psrVal倍' : '--'),
-            _buildInfoRow('PEG レシオ (実績ベース)', pegVal != null && pegVal > 0 ? '$pegVal倍' : '--'),
-            _buildInfoRow('予想配当利回り', yieldVal != null && yieldVal > 0 ? '$yieldVal%' : '--'),
+            _buildInfoRow(
+                '予想配当利回り',
+                yieldVal != null && yieldVal > 0
+                    ? '$yieldVal%'
+                    : (yieldVal == 0.0 ? '0%(無配)' : '--')),
             _buildInfoRow('ROE', roeVal != null ? '$roeVal%' : '--'),
             _buildInfoRow('自己資本比率', equityRatioVal != null && equityRatioVal > 0 ? '$equityRatioVal%' : '--'),
 

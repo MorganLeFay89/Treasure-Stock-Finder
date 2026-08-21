@@ -28,6 +28,8 @@ class MockStockRepository implements StockRepository {
         profitMargin: 9.8,
         forecastPER: 11.2,
         pbr: 1.1,
+        psr: 0.95,
+        peg: 0.85,
         forecastDividendYield: 2.8,
         roe: 10.5,
         roa: 4.2,
@@ -45,6 +47,8 @@ class MockStockRepository implements StockRepository {
         profitMargin: 12.0,
         forecastPER: 14.5,
         pbr: 1.5,
+        psr: 1.80,
+        peg: 1.25,
         forecastDividendYield: 1.2,
         roe: 8.5,
         roa: 3.1,
@@ -62,6 +66,8 @@ class MockStockRepository implements StockRepository {
         profitMargin: 54.3,
         forecastPER: 45.2,
         pbr: 6.8,
+        psr: 16.5,
+        peg: 2.10,
         forecastDividendYield: 0.8,
         roe: 15.2,
         roa: 12.1,
@@ -79,6 +85,8 @@ class MockStockRepository implements StockRepository {
         profitMargin: 18.5,
         forecastPER: 16.2,
         pbr: 1.4,
+        psr: 2.10,
+        peg: 0.75,
         forecastDividendYield: 3.1,
         roe: 22.0,
         roa: 10.5,
@@ -100,6 +108,10 @@ class MockStockRepository implements StockRepository {
       if (condition.forecastPERMax != null && (stock.forecastPER == null || stock.forecastPER! > condition.forecastPERMax!)) return false;
       if (condition.pbrMin != null && (stock.pbr == null || stock.pbr! < condition.pbrMin!)) return false;
       if (condition.pbrMax != null && (stock.pbr == null || stock.pbr! > condition.pbrMax!)) return false;
+      if (condition.psrMin != null && (stock.psr == null || stock.psr! < condition.psrMin!)) return false;
+      if (condition.psrMax != null && (stock.psr == null || stock.psr! > condition.psrMax!)) return false;
+      if (condition.pegMin != null && (stock.peg == null || stock.peg! < condition.pegMin!)) return false;
+      if (condition.pegMax != null && (stock.peg == null || stock.peg! > condition.pegMax!)) return false;
       if (condition.forecastDividendYieldMin != null && (stock.forecastDividendYield == null || stock.forecastDividendYield! < condition.forecastDividendYieldMin!)) return false;
       if (condition.forecastDividendYieldMax != null && (stock.forecastDividendYield == null || stock.forecastDividendYield! > condition.forecastDividendYieldMax!)) return false;
       if (condition.equityRatioMin != null && (stock.equityRatio == null || stock.equityRatio! < condition.equityRatioMin!)) return false;
